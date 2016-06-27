@@ -2,7 +2,6 @@ var gulp = require('gulp');
 var sass = require('gulp-sass');
 var babel = require('gulp-babel');
 var browserify = require('gulp-browserify');
-var uglify = require('gulp-uglify');
 
 // Default runner
 gulp.task('default', ['html','css','js']);
@@ -19,7 +18,7 @@ gulp.task('css', function() {
 });
 
 gulp.task('js', function() {
-  gulp.src('./js/main.js')
+  gulp.src('./js/app.js')
   .pipe(babel({
 			presets: ['es2015']
 		}))
