@@ -4,12 +4,15 @@
 let GridModel = require('./model/grid');
 let GridView = require('./view/grid');
 let PlayerView = require('./view/player');
+let Router = require('./router');
 
 
 
 
 window.addEventListener('load', () => {
     console.log('hello');
+    let router = new Router();
+
     let gmodel = new GridModel();
 
     let grid = new GridView({
@@ -33,6 +36,10 @@ window.addEventListener('load', () => {
             grid.model.left();
         } else if (e.which === 39) {
             grid.model.right();
+        } else if (e.which === 13) {
+            let input = document.getElementById('name');
+            grid.model.changeUser(input.value);
+            input.value = '';
         }
       }
 

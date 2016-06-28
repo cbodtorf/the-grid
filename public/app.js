@@ -7,9 +7,12 @@
 var GridModel = require('./model/grid');
 var GridView = require('./view/grid');
 var PlayerView = require('./view/player');
+var Router = require('./router');
 
 window.addEventListener('load', function () {
     console.log('hello');
+    var router = new Router();
+
     var gmodel = new GridModel();
 
     var grid = new GridView({
@@ -33,10 +36,14 @@ window.addEventListener('load', function () {
             grid.model.left();
         } else if (e.which === 39) {
             grid.model.right();
+        } else if (e.which === 13) {
+            var input = document.getElementById('name');
+            grid.model.changeUser(input.value);
+            input.value = '';
         }
     }
 });
-},{"./model/grid":2,"./view/grid":3,"./view/player":4}],2:[function(require,module,exports){
+},{"./model/grid":2,"./router":3,"./view/grid":4,"./view/player":5}],2:[function(require,module,exports){
 /*******************************
 * MODEL
 * (grid):: to keep track of grid position
@@ -90,6 +97,16 @@ module.exports = Backbone.Model.extend({
 
 },{}],3:[function(require,module,exports){
 /*******************************
+* ROUTER
+*
+********************************/
+
+module.exports = Backbone.Router.extend({
+  
+})
+
+},{}],4:[function(require,module,exports){
+/*******************************
 * VIEW (grid)
 * (grid):: keypress movement aka. TRAVERSING THE GRID
 ********************************/
@@ -102,8 +119,9 @@ module.exports = Backbone.View.extend({
     },
 
     events: {
-
+  
     },
+
 
     render() {
       let x = this.el.querySelector('#xCoord');
@@ -116,7 +134,7 @@ module.exports = Backbone.View.extend({
 
 });
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /*******************************
 * VIEW (player)
 * (grid):: input for username

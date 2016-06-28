@@ -11,8 +11,9 @@ module.exports = Backbone.View.extend({
     },
 
     events: {
-
+  
     },
+
 
     render() {
       let x = this.el.querySelector('#xCoord');
