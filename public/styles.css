@@ -1,6 +1,15 @@
 /*******************************
 * SCSS IMPORTS and Master Styling
 ********************************/
+.main-container {
+  display: flex;
+  justify-content: center;
+  width: 60%;
+  margin: 100px auto;
+  padding: 10px;
+  border: 1px solid black;
+  height: 200px; }
+
 .hidden {
   display: none; }
 

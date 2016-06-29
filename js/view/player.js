@@ -11,7 +11,8 @@ module.exports = Backbone.View.extend({
 
     events: {
         'click #enter': 'enterTheGrid',
-        'click .char': 'characterSelect'
+        'click .char': 'characterSelect',
+        'focus .char': 'characterSelect',
     },
 
     enterTheGrid() {

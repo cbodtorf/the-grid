@@ -29,8 +29,8 @@ module.exports = Backbone.Model.extend({
         playerX: 1,
         playerY: 1,
         username: 'Thor',
-        character: 'light',
-        energy: 10,
+        character: '',
+        energy: 20,
     },
 
     // direction refactor
@@ -43,7 +43,7 @@ module.exports = Backbone.Model.extend({
 
     downLeft(player) {
         let gas = this.consumeEnergy();
-        if (this.get(player && gas === true) > 1) {
+        if (this.get(player) > 1 && gas === true) {
             this.set(player, this.get(player) -1);
           }
     },
@@ -269,7 +269,8 @@ module.exports = Backbone.View.extend({
 
     events: {
         'click #enter': 'enterTheGrid',
-        'click .char': 'characterSelect'
+        'click .char': 'characterSelect',
+        'focus .char': 'characterSelect',
     },
 
     enterTheGrid() {
