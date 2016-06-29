@@ -60,7 +60,7 @@ module.exports = Backbone.Router.extend({
     },
 
     gameTime() {
-        if(this.player.model.get('weightClass') === '') {
+        if(this.player.model.get('playerType') === '') {
             location.href = "#player";
         };
 

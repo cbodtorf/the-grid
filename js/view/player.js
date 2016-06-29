@@ -1,6 +1,6 @@
 /*******************************
 * VIEW (player)
-* (grid):: input for username
+* (grid):: input for name
 ********************************/
 
 module.exports = Backbone.View.extend({
@@ -50,9 +50,9 @@ module.exports = Backbone.View.extend({
 
     render() {
         let user = this.el.querySelector('#user');
-        user.innerHTML = this.model.get('username');
+        user.innerHTML = this.model.get('name');
 
-        let char = this.model.get('weightClass');
+        let char = this.model.get('playerType');
         let charClass = document.getElementById('charClass')
         charClass.innerHTML = char;
     },

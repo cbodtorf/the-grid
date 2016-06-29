@@ -11,12 +11,13 @@ module.exports = Backbone.View.extend({
     },
 
     events: {
-      
+
     },
 
     arrows(e) {
-            let input = document.getElementById('name');
-           if (e.which === 38) {this.model.upRight('playerY');} /*up*/
+            //couldn't figure out how to remove event listener so I had to block it
+           if (this.model.attributes.energy <= 0) {this.model.trigger('end'); return;}
+      else if (e.which === 38) {this.model.upRight('playerY');} /*up*/
       else if (e.which === 40) {this.model.downLeft('playerY');} /*down*/
       else if (e.which === 37) {this.model.downLeft('playerX');} /*left*/
       else if (e.which === 39) {this.model.upRight('playerX');} /*right*/

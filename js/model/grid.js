@@ -6,18 +6,21 @@
 
 module.exports = Backbone.Model.extend({
 
+  initialize() {
+      this.once('end', this.endIt, this);
+  },
+
     url: 'http://tiny-tiny.herokuapp.com/collections/cbgrid/',
 
     defaults: {
 
         playerX: 1,
         playerY: 1,
-        username: 'Thor',
-        weightClass: '',
+        name: 'Thor',
+        playerType: '',
         energy: 20,
         mod: 1,
         score: 0,
-        ready: false,
     },
 
     // direction refactor
@@ -29,6 +32,7 @@ module.exports = Backbone.Model.extend({
     },
 
     downLeft(player) {
+        console.log('hey boy');
         let gas = this.consumeEnergy();
         if (this.get(player) > 1 && gas === true) {
             this.set(player, this.get(player) -1);
@@ -59,28 +63,28 @@ module.exports = Backbone.Model.extend({
 
     // take input from player view
     changeUser(input) {
-        this.set('username', input);
+        this.set('name', input);
     },
-    
-    changeCharacter(char) {
-        this.set('weightClass', char);
 
-        // sets attributes based on ship weightClass
+    changeCharacter(char) {
+        this.set('playerType', char);
+
+        // sets attributes based on ship playerType
         if (char === 'light') {this.set('energy', 20); this.set('mod', 1.2)}
         else if (char === 'medium') {this.set('energy', 25); this.set('mod', 1)}
         else if (char === 'heavy') {this.set('energy', 30); this.set('mod', 0.8)}
     },
 
     consumeEnergy() {
-        if (this.get('energy') > 0) {
-            this.set('energy', this.get('energy') -1);
-            return true;
-        } else {
-          this.trigger('energyDepletion');
-          return false;
-        }
+        this.set('energy', this.get('energy') -1);
+    },
 
-    }
-
+    endIt() {
+      console.log('so close to ending it');
+      if(this.get('energy') <= 0) {
+        this.trigger('energyDepletion');
+        this.save();
+      }
+    },
 
 });
