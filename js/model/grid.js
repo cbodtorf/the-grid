@@ -56,6 +56,9 @@ module.exports = Backbone.Model.extend({
     changeUser(input) {
         this.set('username', input);
     },
+    changeCharacter(char) {
+        this.set('character', char);
+    },
 
     consumeEnergy() {
         if (this.get('energy') > 0) {

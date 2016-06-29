@@ -4,7 +4,9 @@
 .hidden {
   display: none;
 }
-
+.sel {
+    border: 2px solid black;
+}
 
 
 @import "new-player";

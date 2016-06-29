@@ -74,6 +74,9 @@ module.exports = Backbone.Model.extend({
     changeUser(input) {
         this.set('username', input);
     },
+    changeCharacter(char) {
+        this.set('character', char);
+    },
 
     consumeEnergy() {
         if (this.get('energy') > 0) {
@@ -266,6 +269,7 @@ module.exports = Backbone.View.extend({
 
     events: {
         'click #enter': 'enterTheGrid',
+        'click .char': 'characterSelect'
     },
 
     enterTheGrid() {
@@ -279,10 +283,25 @@ module.exports = Backbone.View.extend({
         }
     },
 
+    characterSelect() {
+      let images = document.querySelectorAll('.char');
+      let char = document.activeElement;
+      images.forEach(function(e){
+        e.classList.remove('sel');
+      })
+      this.model.changeCharacter(char.id);
+      char.classList.toggle('sel');
+    },
+
 
     render() {
         let user = this.el.querySelector('#user');
         user.innerHTML = this.model.get('username');
+
+        let char = this.model.get('character');
+        let charClass = document.getElementById('charClass')
+        charClass.innerHTML = char;
+        // char.id.classList.toggle('sel');
     },
 
 });
