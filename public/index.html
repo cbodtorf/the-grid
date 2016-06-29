@@ -15,17 +15,28 @@
           <section id="player">
               <span>user: <span id="user">Thor</span></span>
 
-              <input id="name" type="text" name="name" placeholder="player name" value="">
-              <button id="enter" type="button" name="button">Enter the Grid</button>
+              <input id="name" type="text" name="name" placeholder="player name" value="" tabindex="1">
+              <button id="enter" type="button" name="button" tabindex="2">Enter the Grid</button>
+
+              <img id="light" src="assets/light.png" alt="light" tabindex="3"/>
+              <img id="medium" src="assets/medium.png" alt="medium" tabindex="4"/>
+              <img id="heavy" src="assets/heavy.png" alt="heavy" tabindex="5"/>
 
           </section>
-          <section id="grid">
+          <section id="game" class="hidden">
 
 
               <div>x:<span id="xCoord">1</span></div>
               <div>y:<span id="yCoord">1</span></div>
+              <div>energy:<span id="energy">10</span></div>
 
 
+          </section>
+          <section id="gameOver" class="hidden">
+                <div class="overBox">
+                      <h2>GAME OVER</h2>
+                      <a href="">PLAY AGAIN</a>
+                </div>
           </section>
         </div>
 

@@ -15,9 +15,15 @@ module.exports = Backbone.View.extend({
 
     enterTheGrid() {
         let input = document.getElementById('name');
-        this.model.changeUser(input.value);
-        input.value = '';
+        if (input.value !== '') {
+          this.model.changeUser(input.value);
+          input.value = '';
+          this.model.trigger('play');
+          this.model.trigger('submit');
+          location.href = "#game";
+        }
     },
+
 
     render() {
         let user = this.el.querySelector('#user');
