@@ -12,18 +12,23 @@
 
         <!-- Main Conent -->
         <div class="main-container">
-          <section id="player">
-              <span>user: <span id="user">Thor</span></span>
+          <section id="player" class="hidden">
 
-              <input id="name" type="text" name="name" placeholder="player name" value="" tabindex="1">
-              <button id="enter" type="button" name="button" tabindex="2">Enter the Grid</button>
+              <h1>The Grid</h1>
+              <h3>Select Ship</h3>
 
               <div id='charBox'>
-                <img id="light" class="char" src="assets/light.png" alt="light" tabindex="3"/>
-                <img id="medium" class="char" src="assets/medium.png" alt="medium" tabindex="4"/>
-                <img id="heavy" class="char" src="assets/heavy.png" alt="heavy" tabindex="5"/>
+                <img id="light" class="char" src="assets/lights.png" alt="light" tabindex="1"/>
+                <img id="medium" class="char" src="assets/mediums.png" alt="medium" tabindex="2"/>
+                <img id="heavy" class="char" src="assets/heavys.png" alt="heavy" tabindex="3"/>
               </div>
-              <span id="charClass"></span>
+              <span class="class-name">class: <span id="charClass"></span></span>
+
+              <span class="user-name">user: <span id="user">Thor</span></span>
+
+              <input id="name" type="text" name="name" placeholder="player name" value="" tabindex="4">
+              <button id="changeName" type="button" name="change" tabindex="5">change name</button>
+              <button id="enter" class="enter hidden" type="button" name="enter" tabindex="6">Enter the Grid</button>
 
           </section>
           <section id="game" class="hidden">

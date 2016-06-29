@@ -24,13 +24,18 @@ window.addEventListener('load', function () {
 
 module.exports = Backbone.Model.extend({
 
+    url: 'http://tiny-tiny.herokuapp.com/collections/cbgrid/',
+
     defaults: {
 
         playerX: 1,
         playerY: 1,
         username: 'Thor',
-        character: '',
+        weightClass: '',
         energy: 20,
+        mod: 1,
+        score: 0,
+        ready: false,
     },
 
     // direction refactor
@@ -74,8 +79,14 @@ module.exports = Backbone.Model.extend({
     changeUser(input) {
         this.set('username', input);
     },
+    
     changeCharacter(char) {
-        this.set('character', char);
+        this.set('weightClass', char);
+
+        // sets attributes based on ship weightClass
+        if (char === 'light') {this.set('energy', 20); this.set('mod', 1.2)}
+        else if (char === 'medium') {this.set('energy', 25); this.set('mod', 1)}
+        else if (char === 'heavy') {this.set('energy', 30); this.set('mod', 0.8)}
     },
 
     consumeEnergy() {
@@ -138,10 +149,10 @@ module.exports = Backbone.Router.extend({
     },
 
     routes: {
-        'player': 'playerTime',
-        'game' : 'gameTime',
-        'gameover' : 'gameOverTime',
-        '' : 'playerTime',
+        'player'      : 'playerTime',
+        'game'        : 'gameTime',
+        'gameover'    : 'gameOverTime',
+        ''            : 'playerTime',
     },
 
 
@@ -155,6 +166,10 @@ module.exports = Backbone.Router.extend({
     },
 
     gameTime() {
+        if(this.player.model.get('weightClass') === '') {
+            location.href = "#player";
+        };
+
         this.game.el.classList.remove('hidden');
         this.player.el.classList.add('hidden');
     },
@@ -203,7 +218,7 @@ module.exports = Backbone.View.extend({
     },
 
     events: {
-
+      
     },
 
     arrows(e) {
@@ -269,29 +284,40 @@ module.exports = Backbone.View.extend({
 
     events: {
         'click #enter': 'enterTheGrid',
+        'click #changeName': 'nameChange',
         'click .char': 'characterSelect',
         'focus .char': 'characterSelect',
     },
 
     enterTheGrid() {
-        let input = document.getElementById('name');
-        if (input.value !== '') {
-          this.model.changeUser(input.value);
-          input.value = '';
-          this.model.trigger('play');
-          this.model.trigger('submit');
-          location.href = "#game";
-        }
+          let hiddenCheck = document.getElementById('enter');
+
+          if (!hiddenCheck.classList.contains('hidden')) {
+            this.model.trigger('play');
+            location.href = "#game";
+          }
+    },
+
+    nameChange() {
+      let input = document.getElementById('name');
+      if (input.value !== '') {
+        this.model.changeUser(input.value);
+        input.value = '';
+      }
     },
 
     characterSelect() {
       let images = document.querySelectorAll('.char');
+      let showEnter = document.getElementById('enter');
       let char = document.activeElement;
+
+      //reset selection on view
       images.forEach(function(e){
         e.classList.remove('sel');
       })
       this.model.changeCharacter(char.id);
       char.classList.toggle('sel');
+      showEnter.classList.remove('hidden');
     },
 
 
@@ -299,10 +325,9 @@ module.exports = Backbone.View.extend({
         let user = this.el.querySelector('#user');
         user.innerHTML = this.model.get('username');
 
-        let char = this.model.get('character');
+        let char = this.model.get('weightClass');
         let charClass = document.getElementById('charClass')
         charClass.innerHTML = char;
-        // char.id.classList.toggle('sel');
     },
 
 });

@@ -6,13 +6,18 @@
 
 module.exports = Backbone.Model.extend({
 
+    url: 'http://tiny-tiny.herokuapp.com/collections/cbgrid/',
+
     defaults: {
 
         playerX: 1,
         playerY: 1,
         username: 'Thor',
-        character: '',
+        weightClass: '',
         energy: 20,
+        mod: 1,
+        score: 0,
+        ready: false,
     },
 
     // direction refactor
@@ -56,8 +61,14 @@ module.exports = Backbone.Model.extend({
     changeUser(input) {
         this.set('username', input);
     },
+    
     changeCharacter(char) {
-        this.set('character', char);
+        this.set('weightClass', char);
+
+        // sets attributes based on ship weightClass
+        if (char === 'light') {this.set('energy', 20); this.set('mod', 1.2)}
+        else if (char === 'medium') {this.set('energy', 25); this.set('mod', 1)}
+        else if (char === 'heavy') {this.set('energy', 30); this.set('mod', 0.8)}
     },
 
     consumeEnergy() {

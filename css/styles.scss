@@ -8,17 +8,30 @@
   margin: 100px auto;
   padding: 10px;
   border: 1px solid black;
-  height: 200px;
+  height: 300px;
+}
+
+img {
+  max-width: 50px;
+  max-height: 75px;
+}
+
+.sel {
+    border: 2px solid black;
+    border-radius: 5px;
+}
+
+.user-name {
+  display: block;
+}
+
+.enter{
+  display: block;
 }
 
 .hidden {
   display: none;
 }
-.sel {
-    border: 2px solid black;
-}
-
-
 
 @import "new-player";
 @import "game-view";

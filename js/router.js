@@ -43,10 +43,10 @@ module.exports = Backbone.Router.extend({
     },
 
     routes: {
-        'player': 'playerTime',
-        'game' : 'gameTime',
-        'gameover' : 'gameOverTime',
-        '' : 'playerTime',
+        'player'      : 'playerTime',
+        'game'        : 'gameTime',
+        'gameover'    : 'gameOverTime',
+        ''            : 'playerTime',
     },
 
 
@@ -60,6 +60,10 @@ module.exports = Backbone.Router.extend({
     },
 
     gameTime() {
+        if(this.player.model.get('weightClass') === '') {
+            location.href = "#player";
+        };
+
         this.game.el.classList.remove('hidden');
         this.player.el.classList.add('hidden');
     },

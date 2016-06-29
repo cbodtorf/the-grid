@@ -11,7 +11,7 @@ module.exports = Backbone.View.extend({
     },
 
     events: {
-
+      
     },
 
     arrows(e) {
