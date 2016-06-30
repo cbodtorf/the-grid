@@ -41,18 +41,23 @@ module.exports = Backbone.Model.extend({
         score: 0,
     },
 
+    scoreLogic(mod) {
+      let point = (Math.floor(Math.random() * 10) +1) * mod;
+      console.log(point);
+      this.set('score', Math.ceil((this.get('score') + point)));
+    },
+
     // direction refactor
     upRight(player) {
         let gas = this.consumeEnergy();
-        if (this.get(player) < 10 && gas === true) {
+        if (this.get(player) < 10 && gas === undefined) {
             this.set(player, this.get(player) +1);
           }
     },
 
     downLeft(player) {
-        console.log('hey boy');
         let gas = this.consumeEnergy();
-        if (this.get(player) > 1 && gas === true) {
+        if (this.get(player) > 1 && gas === undefined) {
             this.set(player, this.get(player) -1);
           }
     },
@@ -88,17 +93,17 @@ module.exports = Backbone.Model.extend({
         this.set('playerType', char);
 
         // sets attributes based on ship playerType
-        if (char === 'light') {this.set('energy', 20); this.set('mod', 1.2)}
+        if (char === 'light') {this.set('energy', 20); this.set('mod', 1.3)}
         else if (char === 'medium') {this.set('energy', 25); this.set('mod', 1)}
         else if (char === 'heavy') {this.set('energy', 30); this.set('mod', 0.8)}
     },
 
     consumeEnergy() {
         this.set('energy', this.get('energy') -1);
+        this.scoreLogic(Number(this.get('mod')));
     },
 
     endIt() {
-      console.log('so close to ending it');
       if(this.get('energy') <= 0) {
         this.trigger('energyDepletion');
         this.save();
@@ -187,6 +192,16 @@ module.exports = Backbone.Router.extend({
     // triggered from running out of energy in GRIDMODEL
     youDead() {
       location.href = "#gameover";
+
+      let self = this;
+
+      let highScore = new GridModel();
+      highScore.fetch({
+          url: 'http://tiny-tiny.herokuapp.com/collections/cbgrid/',
+          success() {
+              console.log(this);
+          }
+      })
     },
 
     enterKey(e) {
@@ -245,6 +260,9 @@ module.exports = Backbone.View.extend({
       let energy = this.el.querySelector('#energy');
       energy.innerHTML = this.model.get('energy');
 
+      let score = document.getElementById('scoreG');
+      score.innerHTML = this.model.get('score');
+
     },
 
 });
@@ -270,9 +288,10 @@ module.exports = Backbone.View.extend({
   },
 
   render() {
-
+    let score = document.getElementById('scoreGO');
+    score.innerHTML = this.model.get('score');
   },
-  
+
 })
 
 },{}],6:[function(require,module,exports){

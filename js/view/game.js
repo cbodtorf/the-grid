@@ -34,6 +34,9 @@ module.exports = Backbone.View.extend({
       let energy = this.el.querySelector('#energy');
       energy.innerHTML = this.model.get('energy');
 
+      let score = document.getElementById('scoreG');
+      score.innerHTML = this.model.get('score');
+
     },
 
 });

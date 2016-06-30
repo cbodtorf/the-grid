@@ -18,7 +18,8 @@ module.exports = Backbone.View.extend({
   },
 
   render() {
-
+    let score = document.getElementById('scoreGO');
+    score.innerHTML = this.model.get('score');
   },
-  
+
 })

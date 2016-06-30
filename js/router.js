@@ -77,6 +77,16 @@ module.exports = Backbone.Router.extend({
     // triggered from running out of energy in GRIDMODEL
     youDead() {
       location.href = "#gameover";
+
+      let self = this;
+
+      let highScore = new GridModel();
+      highScore.fetch({
+          url: 'http://tiny-tiny.herokuapp.com/collections/cbgrid/',
+          success() {
+              console.log(this);
+          }
+      })
     },
 
     enterKey(e) {
