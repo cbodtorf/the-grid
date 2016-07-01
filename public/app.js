@@ -15,74 +15,77 @@ window.addEventListener('load', function () {
 
     Backbone.history.start();
 });
-},{"./router":3}],2:[function(require,module,exports){
+},{"./router":5}],2:[function(require,module,exports){
 /*******************************
 * MODEL
 * (grid):: to keep track of grid position
 * (player):: to store player info
 ********************************/
 
+let Highscore = require('./highscore');
+
+
 module.exports = Backbone.Model.extend({
 
-  initialize() {
-      this.once('end', this.endIt, this);
-  },
-
-    url: 'http://tiny-tiny.herokuapp.com/collections/cbgrid/',
+    rand1n10: Math.floor(Math.random() * 10) +1,
+    
+    url: 'http://grid.queencityiron.com/api/highscore',
 
     defaults: {
 
-        playerX: 1,
-        playerY: 1,
-        name: 'Thor',
-        playerType: '',
-        energy: 20,
-        mod: 1,
-        score: 0,
+        X           : this.rand1n10,
+        Y           : this.rand1n10,
+        name        : 'Thor',
+        playerType  : '',
+        energy      : 20,
+        mod         : 1,
+        score       : 0,
     },
 
     scoreLogic(mod) {
-      let point = (Math.floor(Math.random() * 10) +1) * mod;
-      console.log(point);
+      let point = this.rand1n10 * mod;
       this.set('score', Math.ceil((this.get('score') + point)));
     },
 
     // direction refactor
-    upRight(player) {
-        let gas = this.consumeEnergy();
-        if (this.get(player) < 10 && gas === undefined) {
-            this.set(player, this.get(player) +1);
-          }
-    },
+    // upRight(player) {
+    //     let gas = this.consumeEnergy();
+    //     if (this.get(player) < 10 && gas === undefined) {
+    //         this.set(player, this.get(player) +1);
+    //       }
+    // },
+    //
+    // downLeft(player) {
+    //     let gas = this.consumeEnergy();
+    //     if (this.get(player) > 1 && gas === undefined) {
+    //         this.set(player, this.get(player) -1);
+    //       }
+    // },
 
-    downLeft(player) {
-        let gas = this.consumeEnergy();
-        if (this.get(player) > 1 && gas === undefined) {
-            this.set(player, this.get(player) -1);
-          }
+    up() {
+      let gas = this.consumeEnergy();
+      if (this.get('Y') < 10 && gas === undefined) {
+            this.set('Y', this.get('Y') +1);
+        }
     },
-
-    //direction functions
-      // up() {
-      //   if (this.get('playerY') < 10) {
-      //         this.set('playerY', this.get('playerY') +1);
-      //     }
-      // },
-      // down() {
-      //   if (this.get('playerY') > 1) {
-      //         this.set('playerY', this.get('playerY') -1);
-      //     }
-      // },
-      // left() {
-      //   if (this.get('playerX') > 1) {
-      //         this.set('playerX', this.get('playerX') -1);
-      //     }
-      // },
-      // right() {
-      //   if (this.get('playerX') < 10) {
-      //         this.set('playerX', this.get('playerX') +1);
-      //     }
-      // },
+    down() {
+      let gas = this.consumeEnergy();
+      if (this.get('Y') > 1 && gas === undefined) {
+            this.set('Y', this.get('Y') -1);
+        }
+    },
+    left() {
+      let gas = this.consumeEnergy();
+      if (this.get('X') > 1 && gas === undefined) {
+            this.set('X', this.get('X') -1);
+        }
+    },
+    right() {
+      let gas = this.consumeEnergy();
+      if (this.get('X') < 10 && gas === undefined) {
+            this.set('X', this.get('X') +1);
+        }
+    },
 
     // take input from player view
     changeUser(input) {
@@ -103,22 +106,66 @@ module.exports = Backbone.Model.extend({
         this.scoreLogic(Number(this.get('mod')));
     },
 
-    endIt() {
-      if(this.get('energy') <= 0) {
+    canMove() {
+      if (this.get('energy') <= 0) {
         this.trigger('energyDepletion');
-        this.save();
-      }
+        this.get({
+          name: 'name'
+        })
+         return true;
+       }
+       return false;
     },
+
 
 });
 
-},{}],3:[function(require,module,exports){
+},{"./highscore":4}],3:[function(require,module,exports){
+/*******************************
+* Collection (highscore)
+* (model):: highscore
+* (role):: fetch array of highscores from server
+********************************/
+
+let HighscoreModel = require('./highscore');
+
+
+module.exports = Backbone.Collection.extend({
+
+    url     : 'http://grid.queencityiron.com/api/highscore',
+    model   : HighscoreModel,
+
+})
+
+},{"./highscore":4}],4:[function(require,module,exports){
+/*******************************
+* MODEL (highscore)
+* (highscore):: highscore to be sent to server
+* (collection):: connected to highscore.collection.js
+********************************/
+
+module.exports = Backbone.Model.extend({
+
+
+    url: 'http://grid.queencityiron.com/api/highscore',
+
+    defaults: {
+      name        : '',
+      score       : 0,
+      playerType  : '',
+    },
+
+})
+
+},{}],5:[function(require,module,exports){
 // module imports
 
 let GridModel = require('./model/grid');
 let GameView = require('./view/game');
 let PlayerView = require('./view/player');
 let GameOverView = require('./view/gameover');
+let HighscoreCollection = require('./model/highscore.collection')
+let HighscoreModel = require('./model/highscore')
 
 /*******************************
 * ROUTER
@@ -146,11 +193,11 @@ module.exports = Backbone.Router.extend({
             el: document.getElementById('gameOver'),
         });
 
+        // EVENT LISTENER for submiting score
+        this.game.model.once('energyDepletion', this.submitScore.bind(this));
+
         // EVENT LISTENER for activating ARROW keys
         this.player.model.on('play', this.start.bind(this));
-
-        // EVENT LISTENER for Running out of ENERGY
-        this.game.model.on('energyDepletion', this.youDead);
 
         // EVENT LISTENER for ENTER key to submit name
         window.addEventListener("keyup", this.enterKey, false);
@@ -184,24 +231,13 @@ module.exports = Backbone.Router.extend({
     },
 
     gameOverTime() {
+        if(this.player.model.get('score') === 0) {
+            location.href = "#player";
+        };
+
         this.gameOver.el.classList.remove('hidden');
         this.game.el.classList.add('hidden');
         this.player.el.classList.add('hidden');
-    },
-
-    // triggered from running out of energy in GRIDMODEL
-    youDead() {
-      location.href = "#gameover";
-
-      let self = this;
-
-      let highScore = new GridModel();
-      highScore.fetch({
-          url: 'http://tiny-tiny.herokuapp.com/collections/cbgrid/',
-          success() {
-              console.log(this);
-          }
-      })
     },
 
     enterKey(e) {
@@ -214,6 +250,38 @@ module.exports = Backbone.Router.extend({
         }
     },
 
+      // END GAME __ triggered from running out of energy in GRIDMODEL
+    submitScore() {
+      let self = this.game.model;
+        // to highscore model
+        hsmodel = new HighscoreModel({
+          name: self.get('name'),
+          score: self.get('score'),
+          playerType: self.get('playerType'),
+        })
+          //save user score in highscore server
+        console.log(hsmodel);
+        hsmodel.save();
+
+
+        for(let i = 0; i< 2000;i++) {
+          //waste some time yay!
+        };
+          //change to game over screen
+        location.href = "#gameover";
+          // saving context to access gameover screen in fetch function
+        let that = this.gameOver;
+
+          // get the highscore data and smack it on the screen
+        let highScore = new HighscoreCollection();
+        highScore.fetch({
+            url: 'http://grid.queencityiron.com/api/highscore',
+            success() {
+                that.render(highScore.models);
+            }
+        })
+    },
+
     /*******************************************************************************
     * finds ARROWS function in GAMEVIEW and binds it there. (is on WINDOW otherwise)
     ********************************************************************************/
@@ -223,7 +291,7 @@ module.exports = Backbone.Router.extend({
 
 })
 
-},{"./model/grid":2,"./view/game":4,"./view/gameover":5,"./view/player":6}],4:[function(require,module,exports){
+},{"./model/grid":2,"./model/highscore":4,"./model/highscore.collection":3,"./view/game":6,"./view/gameover":7,"./view/player":8}],6:[function(require,module,exports){
 /*******************************
 * VIEW (game)
 * (grid):: keypress movement aka. TRAVERSING THE GRID
@@ -242,20 +310,23 @@ module.exports = Backbone.View.extend({
 
     arrows(e) {
             //couldn't figure out how to remove event listener so I had to block it
-           if (this.model.attributes.energy <= 0) {this.model.trigger('end'); return;}
-      else if (e.which === 38) {this.model.upRight('playerY');} /*up*/
-      else if (e.which === 40) {this.model.downLeft('playerY');} /*down*/
-      else if (e.which === 37) {this.model.downLeft('playerX');} /*left*/
-      else if (e.which === 39) {this.model.upRight('playerX');} /*right*/
+           if (this.model.canMove()){
+             return
+           }
+
+      else if (e.which === 38) {this.model.up();} /*up*/
+      else if (e.which === 40) {this.model.down();} /*down*/
+      else if (e.which === 37) {this.model.left();} /*left*/
+      else if (e.which === 39) {this.model.right();} /*right*/
     }, /* end of arrows */
 
 
     render() {
       let x = this.el.querySelector('#xCoord');
-      x.innerHTML = this.model.get('playerX');
+      x.innerHTML = this.model.get('X');
 
       let y = this.el.querySelector('#yCoord');
-      y.innerHTML = this.model.get('playerY');
+      y.innerHTML = this.model.get('Y');
 
       let energy = this.el.querySelector('#energy');
       energy.innerHTML = this.model.get('energy');
@@ -267,7 +338,7 @@ module.exports = Backbone.View.extend({
 
 });
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /*******************************
 * VIEW (gameover)
 * (grid):: you dead
@@ -276,7 +347,7 @@ module.exports = Backbone.View.extend({
 module.exports = Backbone.View.extend({
 
   initialize() {
-      this.model.on('change', this.render, this);
+      this.model.on("route:[gameover]", this.render, this);
   },
 
   events: {
@@ -284,17 +355,36 @@ module.exports = Backbone.View.extend({
   },
 
   playAgain() {
-
+      // <a> tag covers this for now
   },
 
-  render() {
+  render(data) {
     let score = document.getElementById('scoreGO');
     score.innerHTML = this.model.get('score');
+
+    let highscores = document.getElementById('highScoreList');
+    highscores.innerHTML = '';
+
+    data.forEach(function(e,i) {
+
+        if (i < 10) {
+          let node = document.createElement('DIV');
+          node.innerHTML = `
+          <span class="nameHS">${e.attributes.name}</span>
+          <span class="scoreHS">${e.attributes.score}</span>
+          <span class="playerTypeHS">${e.attributes.playerType}</span>
+        `;
+
+        highscores.appendChild(node);
+      } else {return;}
+
+    })
+
   },
 
 })
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*******************************
 * VIEW (player)
 * (grid):: input for name
@@ -307,10 +397,10 @@ module.exports = Backbone.View.extend({
     },
 
     events: {
-        'click #enter': 'enterTheGrid',
-        'click #changeName': 'nameChange',
-        'click .char': 'characterSelect',
-        'focus .char': 'characterSelect',
+        'click #enter'        : 'enterTheGrid',
+        'click #changeName'   : 'nameChange',
+        'click .char'         : 'characterSelect',
+        'focus .char'         : 'characterSelect',
     },
 
     enterTheGrid() {

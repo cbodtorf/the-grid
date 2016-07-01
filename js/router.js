@@ -4,6 +4,8 @@ let GridModel = require('./model/grid');
 let GameView = require('./view/game');
 let PlayerView = require('./view/player');
 let GameOverView = require('./view/gameover');
+let HighscoreCollection = require('./model/highscore.collection')
+let HighscoreModel = require('./model/highscore')
 
 /*******************************
 * ROUTER
@@ -31,11 +33,11 @@ module.exports = Backbone.Router.extend({
             el: document.getElementById('gameOver'),
         });
 
+        // EVENT LISTENER for submiting score
+        this.game.model.once('energyDepletion', this.submitScore.bind(this));
+
         // EVENT LISTENER for activating ARROW keys
         this.player.model.on('play', this.start.bind(this));
-
-        // EVENT LISTENER for Running out of ENERGY
-        this.game.model.on('energyDepletion', this.youDead);
 
         // EVENT LISTENER for ENTER key to submit name
         window.addEventListener("keyup", this.enterKey, false);
@@ -69,24 +71,13 @@ module.exports = Backbone.Router.extend({
     },
 
     gameOverTime() {
+        if(this.player.model.get('score') === 0) {
+            location.href = "#player";
+        };
+
         this.gameOver.el.classList.remove('hidden');
         this.game.el.classList.add('hidden');
         this.player.el.classList.add('hidden');
-    },
-
-    // triggered from running out of energy in GRIDMODEL
-    youDead() {
-      location.href = "#gameover";
-
-      let self = this;
-
-      let highScore = new GridModel();
-      highScore.fetch({
-          url: 'http://tiny-tiny.herokuapp.com/collections/cbgrid/',
-          success() {
-              console.log(this);
-          }
-      })
     },
 
     enterKey(e) {
@@ -97,6 +88,38 @@ module.exports = Backbone.Router.extend({
           $('button').click();
           input.value = '';
         }
+    },
+
+      // END GAME __ triggered from running out of energy in GRIDMODEL
+    submitScore() {
+      let self = this.game.model;
+        // to highscore model
+        hsmodel = new HighscoreModel({
+          name: self.get('name'),
+          score: self.get('score'),
+          playerType: self.get('playerType'),
+        })
+          //save user score in highscore server
+        console.log(hsmodel);
+        hsmodel.save();
+
+
+        for(let i = 0; i< 2000;i++) {
+          //waste some time yay!
+        };
+          //change to game over screen
+        location.href = "#gameover";
+          // saving context to access gameover screen in fetch function
+        let that = this.gameOver;
+
+          // get the highscore data and smack it on the screen
+        let highScore = new HighscoreCollection();
+        highScore.fetch({
+            url: 'http://grid.queencityiron.com/api/highscore',
+            success() {
+                that.render(highScore.models);
+            }
+        })
     },
 
     /*******************************************************************************

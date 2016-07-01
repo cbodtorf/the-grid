@@ -16,20 +16,23 @@ module.exports = Backbone.View.extend({
 
     arrows(e) {
             //couldn't figure out how to remove event listener so I had to block it
-           if (this.model.attributes.energy <= 0) {this.model.trigger('end'); return;}
-      else if (e.which === 38) {this.model.upRight('playerY');} /*up*/
-      else if (e.which === 40) {this.model.downLeft('playerY');} /*down*/
-      else if (e.which === 37) {this.model.downLeft('playerX');} /*left*/
-      else if (e.which === 39) {this.model.upRight('playerX');} /*right*/
+           if (this.model.canMove()){
+             return
+           }
+
+      else if (e.which === 38) {this.model.up();} /*up*/
+      else if (e.which === 40) {this.model.down();} /*down*/
+      else if (e.which === 37) {this.model.left();} /*left*/
+      else if (e.which === 39) {this.model.right();} /*right*/
     }, /* end of arrows */
 
 
     render() {
       let x = this.el.querySelector('#xCoord');
-      x.innerHTML = this.model.get('playerX');
+      x.innerHTML = this.model.get('X');
 
       let y = this.el.querySelector('#yCoord');
-      y.innerHTML = this.model.get('playerY');
+      y.innerHTML = this.model.get('Y');
 
       let energy = this.el.querySelector('#energy');
       energy.innerHTML = this.model.get('energy');

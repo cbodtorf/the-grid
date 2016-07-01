@@ -4,67 +4,70 @@
 * (player):: to store player info
 ********************************/
 
+let Highscore = require('./highscore');
+
+
 module.exports = Backbone.Model.extend({
 
-  initialize() {
-      this.once('end', this.endIt, this);
-  },
-
-    url: 'http://tiny-tiny.herokuapp.com/collections/cbgrid/',
+    rand1n10: Math.floor(Math.random() * 10) +1,
+    
+    url: 'http://grid.queencityiron.com/api/highscore',
 
     defaults: {
 
-        playerX: 1,
-        playerY: 1,
-        name: 'Thor',
-        playerType: '',
-        energy: 20,
-        mod: 1,
-        score: 0,
+        X           : this.rand1n10,
+        Y           : this.rand1n10,
+        name        : 'Thor',
+        playerType  : '',
+        energy      : 20,
+        mod         : 1,
+        score       : 0,
     },
 
     scoreLogic(mod) {
-      let point = (Math.floor(Math.random() * 10) +1) * mod;
-      console.log(point);
+      let point = this.rand1n10 * mod;
       this.set('score', Math.ceil((this.get('score') + point)));
     },
 
     // direction refactor
-    upRight(player) {
-        let gas = this.consumeEnergy();
-        if (this.get(player) < 10 && gas === undefined) {
-            this.set(player, this.get(player) +1);
-          }
-    },
+    // upRight(player) {
+    //     let gas = this.consumeEnergy();
+    //     if (this.get(player) < 10 && gas === undefined) {
+    //         this.set(player, this.get(player) +1);
+    //       }
+    // },
+    //
+    // downLeft(player) {
+    //     let gas = this.consumeEnergy();
+    //     if (this.get(player) > 1 && gas === undefined) {
+    //         this.set(player, this.get(player) -1);
+    //       }
+    // },
 
-    downLeft(player) {
-        let gas = this.consumeEnergy();
-        if (this.get(player) > 1 && gas === undefined) {
-            this.set(player, this.get(player) -1);
-          }
+    up() {
+      let gas = this.consumeEnergy();
+      if (this.get('Y') < 10 && gas === undefined) {
+            this.set('Y', this.get('Y') +1);
+        }
     },
-
-    //direction functions
-      // up() {
-      //   if (this.get('playerY') < 10) {
-      //         this.set('playerY', this.get('playerY') +1);
-      //     }
-      // },
-      // down() {
-      //   if (this.get('playerY') > 1) {
-      //         this.set('playerY', this.get('playerY') -1);
-      //     }
-      // },
-      // left() {
-      //   if (this.get('playerX') > 1) {
-      //         this.set('playerX', this.get('playerX') -1);
-      //     }
-      // },
-      // right() {
-      //   if (this.get('playerX') < 10) {
-      //         this.set('playerX', this.get('playerX') +1);
-      //     }
-      // },
+    down() {
+      let gas = this.consumeEnergy();
+      if (this.get('Y') > 1 && gas === undefined) {
+            this.set('Y', this.get('Y') -1);
+        }
+    },
+    left() {
+      let gas = this.consumeEnergy();
+      if (this.get('X') > 1 && gas === undefined) {
+            this.set('X', this.get('X') -1);
+        }
+    },
+    right() {
+      let gas = this.consumeEnergy();
+      if (this.get('X') < 10 && gas === undefined) {
+            this.set('X', this.get('X') +1);
+        }
+    },
 
     // take input from player view
     changeUser(input) {
@@ -85,11 +88,16 @@ module.exports = Backbone.Model.extend({
         this.scoreLogic(Number(this.get('mod')));
     },
 
-    endIt() {
-      if(this.get('energy') <= 0) {
+    canMove() {
+      if (this.get('energy') <= 0) {
         this.trigger('energyDepletion');
-        this.save();
-      }
+        this.get({
+          name: 'name'
+        })
+         return true;
+       }
+       return false;
     },
+
 
 });
