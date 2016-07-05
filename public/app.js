@@ -27,23 +27,27 @@ let Highscore = require('./highscore');
 
 module.exports = Backbone.Model.extend({
 
-    rand1n10: Math.floor(Math.random() * 10) +1,
-    
+    rand1n10() {
+      return Math.floor(Math.random() * 10) +1;
+    },
+
     url: 'http://grid.queencityiron.com/api/highscore',
 
     defaults: {
 
-        X           : this.rand1n10,
-        Y           : this.rand1n10,
+        X           : Math.floor(Math.random() * 10) +1,
+        Y           : Math.floor(Math.random() * 10) +1 ,
+        prevXY      : '',
         name        : 'Thor',
         playerType  : '',
         energy      : 20,
         mod         : 1,
         score       : 0,
+        gridArr     : [],
     },
 
     scoreLogic(mod) {
-      let point = this.rand1n10 * mod;
+      let point = this.rand1n10() * mod;
       this.set('score', Math.ceil((this.get('score') + point)));
     },
 
@@ -63,28 +67,39 @@ module.exports = Backbone.Model.extend({
     // },
 
     up() {
+      this.logPrevPos();
       let gas = this.consumeEnergy();
       if (this.get('Y') < 10 && gas === undefined) {
             this.set('Y', this.get('Y') +1);
+            // console.log(this.get('prevXY'));
         }
     },
     down() {
+      this.logPrevPos();
       let gas = this.consumeEnergy();
       if (this.get('Y') > 1 && gas === undefined) {
             this.set('Y', this.get('Y') -1);
         }
     },
     left() {
+      this.logPrevPos();
       let gas = this.consumeEnergy();
       if (this.get('X') > 1 && gas === undefined) {
             this.set('X', this.get('X') -1);
         }
     },
     right() {
+      this.logPrevPos();
       let gas = this.consumeEnergy();
       if (this.get('X') < 10 && gas === undefined) {
             this.set('X', this.get('X') +1);
         }
+    },
+
+    logPrevPos() {
+      let x = this.get('X');
+      let y = this.get('Y');
+      this.set('prevXY',`y${y}x${x}`);
     },
 
     // take input from player view
@@ -96,9 +111,9 @@ module.exports = Backbone.Model.extend({
         this.set('playerType', char);
 
         // sets attributes based on ship playerType
-        if (char === 'light') {this.set('energy', 20); this.set('mod', 1.3)}
-        else if (char === 'medium') {this.set('energy', 25); this.set('mod', 1)}
-        else if (char === 'heavy') {this.set('energy', 30); this.set('mod', 0.8)}
+        if (char === 'Small') {this.set('energy', 20); this.set('mod', 1.3)}
+        else if (char === 'Big') {this.set('energy', 25); this.set('mod', 1)}
+        else if (char === 'Gargantuan') {this.set('energy', 30); this.set('mod', 0.8)}
     },
 
     consumeEnergy() {
@@ -117,6 +132,16 @@ module.exports = Backbone.Model.extend({
        return false;
     },
 
+    gridCreate(rows) {
+      let arr = [];
+
+      for (var i=0;i<rows;i++) {
+           arr[i] = [];
+        }
+      this.set('gridArr', arr);
+      return arr;
+
+    }
 
 });
 
@@ -164,8 +189,8 @@ let GridModel = require('./model/grid');
 let GameView = require('./view/game');
 let PlayerView = require('./view/player');
 let GameOverView = require('./view/gameover');
-let HighscoreCollection = require('./model/highscore.collection')
-let HighscoreModel = require('./model/highscore')
+let HighscoreCollection = require('./model/highscore.collection');
+let HighscoreModel = require('./model/highscore');
 
 /*******************************
 * ROUTER
@@ -259,27 +284,30 @@ module.exports = Backbone.Router.extend({
           score: self.get('score'),
           playerType: self.get('playerType'),
         })
+
+        //change to game over screen
+      location.href = "#gameover";
+        // saving context to access gameover screen in fetch function
+      let that = this.gameOver;
+
+        // get the highscore data and smack it on the screen
+      let highScore = new HighscoreCollection();
+
           //save user score in highscore server
         console.log(hsmodel);
-        hsmodel.save();
+        hsmodel.save(null, {
+          success() {
 
+            highScore.fetch({
+                url: 'http://grid.queencityiron.com/api/highscore',
+                success() {
+                    that.render(highScore.models);
+                }
+            })
 
-        for(let i = 0; i< 2000;i++) {
-          //waste some time yay!
-        };
-          //change to game over screen
-        location.href = "#gameover";
-          // saving context to access gameover screen in fetch function
-        let that = this.gameOver;
+          }
+        });
 
-          // get the highscore data and smack it on the screen
-        let highScore = new HighscoreCollection();
-        highScore.fetch({
-            url: 'http://grid.queencityiron.com/api/highscore',
-            success() {
-                that.render(highScore.models);
-            }
-        })
     },
 
     /*******************************************************************************
@@ -302,6 +330,21 @@ module.exports = Backbone.View.extend({
 
     initialize() {
         this.model.on('change', this.render, this);
+
+        let superGrid = document.getElementById('gameboard');
+        for(var y =1; y <= 10;y++){
+          let row = document.createElement('DIV');
+          row.id = `y${y}`;
+          row.className = 'row';
+          superGrid.appendChild(row);
+          for(var x= 1; x <= 10; x++){
+            let cell = document.createElement('DIV');
+            cell.id = `${row.id}x${x}`;
+            cell.className = 'col';
+            row.appendChild(cell);
+          }
+
+        }
     },
 
     events: {
@@ -322,17 +365,27 @@ module.exports = Backbone.View.extend({
 
 
     render() {
+      let ypos = this.model.get('Y');
+      let xpos = this.model.get('X');
+
       let x = this.el.querySelector('#xCoord');
-      x.innerHTML = this.model.get('X');
+      x.innerHTML = xpos;
 
       let y = this.el.querySelector('#yCoord');
-      y.innerHTML = this.model.get('Y');
+      y.innerHTML = ypos;
+
+      //position on grid
+      let coords = `y${ypos}x${xpos}`;
+      let gridPos = this.el.querySelector(`#${coords}`);
+      
+      gridPos.classList.toggle('gsel');
 
       let energy = this.el.querySelector('#energy');
       energy.innerHTML = this.model.get('energy');
 
       let score = document.getElementById('scoreG');
       score.innerHTML = this.model.get('score');
+
 
     },
 
@@ -409,6 +462,7 @@ module.exports = Backbone.View.extend({
           if (!hiddenCheck.classList.contains('hidden')) {
             this.model.trigger('play');
             location.href = "#game";
+            this.model.gridCreate(10);
           }
     },
 

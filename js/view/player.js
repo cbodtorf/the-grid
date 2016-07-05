@@ -22,6 +22,7 @@ module.exports = Backbone.View.extend({
           if (!hiddenCheck.classList.contains('hidden')) {
             this.model.trigger('play');
             location.href = "#game";
+            this.model.gridCreate(10);
           }
     },
 

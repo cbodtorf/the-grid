@@ -4,8 +4,8 @@ let GridModel = require('./model/grid');
 let GameView = require('./view/game');
 let PlayerView = require('./view/player');
 let GameOverView = require('./view/gameover');
-let HighscoreCollection = require('./model/highscore.collection')
-let HighscoreModel = require('./model/highscore')
+let HighscoreCollection = require('./model/highscore.collection');
+let HighscoreModel = require('./model/highscore');
 
 /*******************************
 * ROUTER
@@ -99,27 +99,30 @@ module.exports = Backbone.Router.extend({
           score: self.get('score'),
           playerType: self.get('playerType'),
         })
+
+        //change to game over screen
+      location.href = "#gameover";
+        // saving context to access gameover screen in fetch function
+      let that = this.gameOver;
+
+        // get the highscore data and smack it on the screen
+      let highScore = new HighscoreCollection();
+
           //save user score in highscore server
         console.log(hsmodel);
-        hsmodel.save();
+        hsmodel.save(null, {
+          success() {
 
+            highScore.fetch({
+                url: 'http://grid.queencityiron.com/api/highscore',
+                success() {
+                    that.render(highScore.models);
+                }
+            })
 
-        for(let i = 0; i< 2000;i++) {
-          //waste some time yay!
-        };
-          //change to game over screen
-        location.href = "#gameover";
-          // saving context to access gameover screen in fetch function
-        let that = this.gameOver;
+          }
+        });
 
-          // get the highscore data and smack it on the screen
-        let highScore = new HighscoreCollection();
-        highScore.fetch({
-            url: 'http://grid.queencityiron.com/api/highscore',
-            success() {
-                that.render(highScore.models);
-            }
-        })
     },
 
     /*******************************************************************************
